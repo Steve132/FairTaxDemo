@@ -1,10 +1,5 @@
 $(function(){
-	
-rentdata={'married':[643,817,817,1102,1102],
-'unmarried':560+243(x//2)}
-	
-	
-	
+		
 var taxitems={
 	'gross_income':{
 		affects_fairtax:true,
@@ -53,16 +48,30 @@ var taxitems={
 		flavor_text:"How much is your monthly rent?  Put 0 if you own your home (even if you have a mortgage), or don't pay for housing for some reason (homeless or live with family)",
 		current_value:1,
 		manually_modified:false,
-		compute_average_value:function (taxitems) { return 1; },
+		compute_average_value:function (taxitems) { 
+			var c=taxitems['num_dependants']['current_value'];
+			var crooms=Math.floor((c+1)/2.0);
+			console.log(crooms);
+			var m=taxitems['married_status']['current_value'];
+			if(m)
+			{
+				return 643.0+118.0*crooms;
+			}
+			else
+			{
+				return 560+243*crooms;
+			}
+		},
 		average_value_sources:"http://cost-of-living.careertrends.com/l/615/The-United-States",
-		input_html:'<span class="input-group-addon">Number of dependents</span><input type="number" class="form-control" name="rent_val" min="0" max="10000"></input>',
+		input_html:'<span class="input-group-addon">Rent</span><input type="number" class="form-control" name="rent_val" min="0" max="10000"></input>',
 		set_value:function(val){ $("[name=rent_val]").val(val); }
 	}
 };
 
 var pageitems=['gross_income',
 'married_status',
-'num_dependants']; //this needs to be in topological sort order
+'num_dependants',
+'rent']; //this needs to be in topological sort order
 
 function update_pageitems_values()
 {
@@ -71,8 +80,13 @@ function update_pageitems_values()
 		if(!taxitems[itemname]['manually_modified'])
 		{
 			var value=taxitems[itemname]['compute_average_value'](taxitems);
+			console.log(itemname+' was recalculated to be '+value.toString())
 			taxitems[itemname]['current_value']=value;
 			taxitems[itemname]['set_value'](value);
+		}
+		else
+		{
+			taxitems[itemname]['current_value']=$("[name="+itemname+"_val]").val();
 		}
 	});
 }
